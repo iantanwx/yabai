@@ -302,7 +302,14 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
             view_list[view_count++] = view;
         }
 
-        if (g_mouse_state.window == window) g_mouse_state.window = NULL;
+        if (g_mouse_state.window == window) {
+            if (g_mouse_state.feedback_node) {
+                g_mouse_state.feedback_node->insert_dir = 0;
+                insert_feedback_destroy(g_mouse_state.feedback_node);
+                g_mouse_state.feedback_node = NULL;
+            }
+            g_mouse_state.window = NULL;
+        }
         if (g_mouse_state.ffm_window_id == window->id) g_mouse_state.ffm_window_id = 0;
 
         if (window->is_eligible) {
@@ -616,7 +623,14 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
         window_manager_remove_managed_window(&g_window_manager, window->id);
     }
 
-    if (g_mouse_state.window == window) g_mouse_state.window = NULL;
+    if (g_mouse_state.window == window) {
+        if (g_mouse_state.feedback_node) {
+            g_mouse_state.feedback_node->insert_dir = 0;
+            insert_feedback_destroy(g_mouse_state.feedback_node);
+            g_mouse_state.feedback_node = NULL;
+        }
+        g_mouse_state.window = NULL;
+    }
     if (g_mouse_state.ffm_window_id == window->id) g_mouse_state.ffm_window_id = 0;
 
     if (window->is_eligible) {
