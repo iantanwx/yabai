@@ -295,6 +295,12 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
             // This is necessary to make sure that we do not call the AX API for each modification to the tree.
             //
 
+            if (g_mouse_state.feedback_node) {
+                g_mouse_state.feedback_node->insert_dir = 0;
+                insert_feedback_destroy(g_mouse_state.feedback_node);
+                g_mouse_state.feedback_node = NULL;
+            }
+
             view_remove_window_node(view, window);
             window_manager_remove_managed_window(&g_window_manager, window->id);
 
@@ -303,11 +309,6 @@ static EVENT_HANDLER(APPLICATION_TERMINATED)
         }
 
         if (g_mouse_state.window == window) {
-            if (g_mouse_state.feedback_node) {
-                g_mouse_state.feedback_node->insert_dir = 0;
-                insert_feedback_destroy(g_mouse_state.feedback_node);
-                g_mouse_state.feedback_node = NULL;
-            }
             g_mouse_state.window = NULL;
         }
         if (g_mouse_state.ffm_window_id == window->id) g_mouse_state.ffm_window_id = 0;
@@ -617,6 +618,12 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
 
     debug("%s: %s %d\n", __FUNCTION__, window->application ? window->application->name : "<unknown>", window->id);
 
+    if (g_mouse_state.feedback_node) {
+        g_mouse_state.feedback_node->insert_dir = 0;
+        insert_feedback_destroy(g_mouse_state.feedback_node);
+        g_mouse_state.feedback_node = NULL;
+    }
+
     struct view *view = window_manager_find_managed_window(&g_window_manager, window);
     if (view) {
         space_manager_untile_window(view, window);
@@ -624,11 +631,6 @@ static EVENT_HANDLER(WINDOW_DESTROYED)
     }
 
     if (g_mouse_state.window == window) {
-        if (g_mouse_state.feedback_node) {
-            g_mouse_state.feedback_node->insert_dir = 0;
-            insert_feedback_destroy(g_mouse_state.feedback_node);
-            g_mouse_state.feedback_node = NULL;
-        }
         g_mouse_state.window = NULL;
     }
     if (g_mouse_state.ffm_window_id == window->id) g_mouse_state.ffm_window_id = 0;
@@ -1284,6 +1286,11 @@ static EVENT_HANDLER(MOUSE_UP)
     }
 
 err:
+    if (g_mouse_state.feedback_node) {
+        g_mouse_state.feedback_node->insert_dir = 0;
+        insert_feedback_destroy(g_mouse_state.feedback_node);
+        g_mouse_state.feedback_node = NULL;
+    }
     g_mouse_state.window = NULL;
 res:
     g_mouse_state.current_action = MOUSE_MODE_NONE;
@@ -1298,6 +1305,11 @@ static EVENT_HANDLER(MOUSE_DRAGGED)
 
     if (!__sync_bool_compare_and_swap(&g_mouse_state.window->id_ptr, &g_mouse_state.window->id, &g_mouse_state.window->id)) {
         debug("%s: %d has been marked invalid by the system, ignoring event..\n", __FUNCTION__, g_mouse_state.window->id);
+        if (g_mouse_state.feedback_node) {
+            g_mouse_state.feedback_node->insert_dir = 0;
+            insert_feedback_destroy(g_mouse_state.feedback_node);
+            g_mouse_state.feedback_node = NULL;
+        }
         g_mouse_state.window = NULL;
         g_mouse_state.current_action = MOUSE_MODE_NONE;
         CFRelease(context);
