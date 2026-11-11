@@ -279,7 +279,17 @@ static int scripting_addition_perform_validation(void)
     }
 
     if (string_equals(version, OSAX_VERSION)) {
-        if ((attrib & OSAX_ATTRIB_ALL) == OSAX_ATTRIB_ALL) {
+        //
+        // NOTE: macOS 27 has no set_front_window, dppm or move_space
+        // patterns yet; space focus, create and destroy still work.
+        //
+
+        uint32_t required_attrib = OSAX_ATTRIB_ALL;
+        if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion >= 27) {
+            required_attrib &= ~(OSAX_ATTRIB_SET_WINDOW | OSAX_ATTRIB_DPPM | OSAX_ATTRIB_MOV_SPACE);
+        }
+
+        if ((attrib & required_attrib) == required_attrib) {
             notify("scripting-addition", "payload v%s", version);
             return 0;
         }
