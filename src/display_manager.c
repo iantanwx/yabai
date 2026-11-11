@@ -354,38 +354,18 @@ CGRect display_manager_dock_rect(void)
 
 bool display_manager_active_display_is_animating(void)
 {
-    if (workspace_is_macos_bigsur()   ||
-        workspace_is_macos_monterey() ||
-        workspace_is_macos_ventura())
-    {
-        CFStringRef uuid = display_manager_active_display_uuid();
-        assert(uuid);
-
-        bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
-        CFRelease(uuid);
-
-        return result;
-    }
-
-    return false; // This does not return a correct result on modern macOS versions.
+    // This does not return a correct result after a space switch initiated by
+    // app activation (app switcher, dock), the transition is then never
+    // reported as finished and every space operation is locked out until
+    // mission control clears the state. Same class as the newer macOS
+    // versions, which are stubbed out below.
+    return false;
 }
 
 bool display_manager_display_is_animating(uint32_t did)
 {
-    if (workspace_is_macos_bigsur()   ||
-        workspace_is_macos_monterey() ||
-        workspace_is_macos_ventura())
-    {
-        CFStringRef uuid = display_uuid(did);
-        if (!uuid) return false;
-
-        bool result = SLSManagedDisplayIsAnimating(g_connection, uuid);
-        CFRelease(uuid);
-
-        return result;
-    }
-
-    return false; // This does not return a correct result on modern macOS versions.
+    // See display_manager_active_display_is_animating.
+    return false;
 }
 
 int display_manager_active_display_count(void)
