@@ -1310,7 +1310,15 @@ static void window_manager_make_key_window(ProcessSerialNumber *window_psn, uint
     g_event_bytes[0x04] = 0xf8;
     g_event_bytes[0x3a] = 0x10;
     memcpy(g_event_bytes + 0x3c, &window_id, sizeof(uint32_t));
-    memset(g_event_bytes + 0x20, 0xff, 0x10);
+
+    //
+    // NOTE(#2816): Chrome PWAs close when the event location is NaN (the
+    // 0xff fill); place the event far off-screen instead.
+    //
+
+    double location = -1e6;
+    memcpy(g_event_bytes + 0x20, &location, sizeof(double));
+    memcpy(g_event_bytes + 0x28, &location, sizeof(double));
 
     g_event_bytes[0x08] = 0x01;
     SLPSPostEventRecordTo(window_psn, g_event_bytes);
